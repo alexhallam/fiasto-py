@@ -39,33 +39,112 @@ pip install fiasto-py
 
 ```python
 import fiasto_py
-
+from pprint import pprint
 # Parse a formula into structured metadata
+print("="*30)
+print("Parse Formula")
+print("="*30)
 result = fiasto_py.parse_formula("y ~ x1 + x2 + (1|group)")
-print(result)
-
-# Tokenize a formula
-tokens = fiasto_py.lex_formula("y ~ x1 * x2 + s(z)")
-print(tokens)
+pprint(result, compact = True)
 ```
-
-### Example
+![Parse Formula](img/parse.png)
 
 ```python
 import fiasto_py
-import json
-
-# Parse a complex mixed-effects formula
-formula = "y ~ x1 * x2 + s(z) + (1+x1|group)"
-parsed = fiasto_py.parse_formula(formula)
-
-# Pretty print the result
-print(json.dumps(parsed, indent=2))
-
-# Tokenize the same formula
-tokens = fiasto_py.lex_formula(formula)
-print(json.dumps(tokens, indent=2))
+from pprint import pprint
+print("="*30)
+print("Lex Formula")
+print("="*30)
+tokens = fiasto_py.lex_formula("y ~ x1 + x2 + (1|group)")
+pprint(tokens, compact = True)
 ```
+![Lex Formula](img/lex.png)
+
+
+
+### Simple OLS Regression
+
+```python
+import fiasto_py
+import polars as pl
+import numpy as np
+from pprint import pprint
+
+# Load data
+mtcars_path = "https://gist.githubusercontent.com/seankross/a412dfbd88b3db70b74b/raw/5f23f993cd87c283ce766e7ac6b329ee7cc2e1d1/mtcars.csv"
+df = pl.read_csv(mtcars_path)
+
+# Parse formula
+formula = "mpg ~ wt + cyl"
+result = fiasto_py.parse_formula(formula)
+
+pprint(result)
+
+# Find the response column(s)
+response_cols = [
+    col for col, details in result["columns"].items()
+    if "Response" in details["roles"]
+]
+
+# Find non-response columns
+preds = [
+    col for col, details in result["columns"].items()
+    if "Response" not in details["roles"]
+]
+
+# Has intercept
+has_intercept = result["metadata"]["has_intercept"]
+
+# Prepare data matrices
+X = df.select(preds).to_numpy()
+y = df.select(response_cols).to_numpy().ravel()
+
+# Add intercept if metadata says so
+if has_intercept:
+    X_with_intercept = np.column_stack([np.ones(X.shape[0]), X])
+else:
+    X_with_intercept = X
+
+# Solve normal equations: (X'X)^-1 X'y
+XTX = X_with_intercept.T @ X_with_intercept
+XTy = X_with_intercept.T @ y
+coefficients = np.linalg.solve(XTX, XTy)
+
+# Extract intercept and slopes
+if has_intercept:
+    intercept = coefficients[0]
+    slopes = coefficients[1:]
+else:
+    intercept = 0.0
+    slopes = coefficients
+
+# Calculate R2
+y_pred = X_with_intercept @ coefficients
+ss_res = np.sum((y - y_pred) ** 2)
+ss_tot = np.sum((y - np.mean(y)) ** 2)
+r_squared = 1 - (ss_res / ss_tot)
+
+# Prep Output
+# Combine intercept and slopes into one dict
+coef_dict = {"intercept": intercept} | dict(zip(preds, slopes))
+
+# Create a tidy DataFrame
+coef_df = pl.DataFrame(
+    {
+        "term": list(coef_dict.keys()),
+        "estimate": list(coef_dict.values())
+    }
+)
+
+# Print results
+print(f"Formula: {formula}")
+print(f"R² Score: {r_squared:.3f}")
+print(coef_df)
+```
+
+**Output:**
+![OLS Regression](img/ols.png)
+
 
 ## 📋 Supported Formula Syntax
 
