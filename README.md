@@ -1,37 +1,39 @@
 # fiasto-py
 
+[![PyPI version](https://badge.fury.io/py/fiasto-py.svg)](https://badge.fury.io/py/fiasto-py)
+[![Python versions](https://img.shields.io/pypi/pyversions/fiasto-py.svg)](https://pypi.org/project/fiasto-py/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+<h1 align="center">fiasto-py</h1>
+
+<p align="center">
+  <img src="img/mango_pixle2_py.png" alt="logo" width="240">
+</p>
+
+---
+
+<p align="center">Pronouned like <strong>fiasco</strong>, but with a <strong>t</strong> instead of a <strong>c</strong></p>
+
+---
+
+<p align="center">(F)ormulas (I)n (AST) (O)ut</p>
+
 Python bindings for [fiasto](https://github.com/alexhallam/fiasto) - A language-agnostic modern Wilkinson's formula parser and lexer.
 
 ## 🎯 Features
 
 - **Parse Wilkinson's Formulas**: Convert formula strings into structured JSON metadata
 - **Tokenize Formulas**: Break down formulas into individual tokens with detailed information
-- **High Performance**: Built with Rust and PyO3 for maximum speed
 - **Python Dictionaries**: Returns native Python dictionaries for easy integration
 
 ## 🚀 Quick Start
 
 ### Installation
 
-1. **Install from PyPI** (recommended):
-   ```bash
-   pip install fiasto-py
-   ```
-
-2. **Build from source** (for development):
-   ```bash
-   # Install maturin if you haven't already
-   pip install maturin
-   
-   # Build and install in development mode
-   # Note: For Python 3.13, use the forward compatibility flag
-   PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 maturin develop
-   ```
-
-3. **Or use the build script**:
-   ```bash
-   python build.py
-   ```
+**Install from PyPI** (recommended):
+```bash
+pip install fiasto-py
+```
 
 ### Usage
 
@@ -74,10 +76,26 @@ fiasto supports comprehensive Wilkinson's notation including:
 - **Smooth terms**: `y ~ s(z)`
 - **Random effects**: `y ~ x + (1|group)`
 - **Complex random effects**: `y ~ x + (1+x|group)`
-- **Multivariate models**: `mvbind(y1, y2) ~ x + (1|g)`
 - **Non-linear models**: `y ~ a1 - a2^x, a1 ~ 1, a2 ~ x + (x|g), nl = TRUE`
 
+### Supported Formulas (Coming Soon)
+
+- **Multivariate models**: `mvbind(y1, y2) ~ x + (1|g)`
+
+
 For the complete syntax reference, see the [fiasto documentation](https://github.com/alexhallam/fiasto).
+
+## 📦 PyPI Package
+
+The package is available on PyPI and can be installed with:
+
+```bash
+pip install fiasto-py
+```
+
+- **PyPI Page**: [pypi.org/project/fiasto-py](https://pypi.org/project/fiasto-py/)
+- **Source Code**: [github.com/alexhallam/fiasto-py](https://github.com/alexhallam/fiasto-py)
+- **Documentation**: This README and inline docstrings
 
 ## 🛠️ Development
 
@@ -100,6 +118,10 @@ PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 maturin build --release
 python example.py
 ```
 
+### Publishing
+
+See [PYPI_GUIDE.md](PYPI_GUIDE.md) for detailed publishing instructions.
+
 ### Project Structure
 
 ```
@@ -108,8 +130,12 @@ fiasto-py/
 │   └── lib.rs          # PyO3 module definition
 ├── Cargo.toml          # Rust dependencies
 ├── pyproject.toml      # Python package configuration
-├── build.py            # Build script
+├── LICENSE             # MIT license
+├── build.py            # Development build script
+├── publish.py          # PyPI publishing script
 ├── example.py          # Usage examples
+├── PYPI_GUIDE.md       # Publishing guide
+├── .gitignore          # Git ignore rules
 └── README.md           # This file
 ```
 
@@ -145,12 +171,13 @@ Tokenize a formula string and return JSON describing each token.
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [fiasto repository](https://github.com/alexhallam/fiasto) for details.
-
 ## 🙏 Acknowledgments
 
 - [fiasto](https://github.com/alexhallam/fiasto) - The underlying Rust library
 - [PyO3](https://pyo3.rs/) - Python-Rust bindings
 - [maturin](https://maturin.rs/) - Build system for Python extensions
+- [PyPI](https://pypi.org/) - Python Package Index for distribution
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
