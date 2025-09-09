@@ -210,7 +210,50 @@ print(coef_df)
 ```
 
 **Output:**
-![OLS Regression](img/ols.png)
+
+```json
+{'all_generated_columns': ['mpg', 'intercept', 'wt', 'cyl'],
+ 'all_generated_columns_formula_order': {'1': 'mpg',
+                                         '2': 'intercept',
+                                         '3': 'wt',
+                                         '4': 'cyl'},
+ 'columns': {'cyl': {'generated_columns': ['cyl'],
+                     'id': 3,
+                     'interactions': [],
+                     'random_effects': [],
+                     'roles': ['Identity'],
+                     'transformations': []},
+             'mpg': {'generated_columns': ['mpg'],
+                     'id': 1,
+                     'interactions': [],
+                     'random_effects': [],
+                     'roles': ['Response'],
+                     'transformations': []},
+             'wt': {'generated_columns': ['wt'],
+                    'id': 2,
+                    'interactions': [],
+                    'random_effects': [],
+                    'roles': ['Identity'],
+                    'transformations': []}},
+ 'formula': 'mpg ~ wt + cyl',
+ 'metadata': {'family': None,
+              'has_intercept': True,
+              'has_uncorrelated_slopes_and_intercepts': False,
+              'is_random_effects_model': False,
+              'response_variable_count': 1}}
+Formula: mpg ~ wt + cyl
+R² Score: 0.830
+shape: (3, 2)
+┌───────────┬───────────┐
+│ term      ┆ estimate  │
+│ ---       ┆ ---       │
+│ str       ┆ f64       │
+╞═══════════╪═══════════╡
+│ intercept ┆ 39.686261 │
+│ cyl       ┆ -1.507795 │
+│ wt        ┆ -3.190972 │
+└───────────┴───────────┘
+```
 
 
 ## 📋 Supported Formula Syntax
