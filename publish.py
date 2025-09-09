@@ -72,7 +72,7 @@ def build_package():
     """Build the package for distribution"""
     print("🔨 Building package for distribution...")
     
-    # Build with maturin
+    # Build with maturin (with Python 3.13 compatibility)
     cmd = "PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 maturin build --release"
     if not run_command(cmd, "Building package with maturin"):
         return False
