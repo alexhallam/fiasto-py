@@ -24,10 +24,8 @@ def main():
         "y ~ x1 + x2",
         "y ~ x1 * x2 + s(z)",
         "y ~ x1 + x2 + (1|group)",
-        "y ~ x1 * x2 + s(z) + (1+x1|group)",
-        "mvbind(y1, y2) ~ x * z + (1|g)",
-        "y ~ a1 - a2^x, a1 ~ 1, a2 ~ x + (x|g), nl = TRUE"
-    ]
+        "y ~ x1 * x2 + s(z) + (1+x1|group)"
+        ]
     
     for i, formula in enumerate(formulas, 1):
         print(f"\n🔍 Example {i}: {formula}")

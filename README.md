@@ -69,21 +69,20 @@ print(json.dumps(tokens, indent=2))
 
 ## 📋 Supported Formula Syntax
 
-fiasto supports comprehensive Wilkinson's notation including:
+`fiasto` supports comprehensive Wilkinson's notation including:
 
 - **Basic formulas**: `y ~ x1 + x2`
 - **Interactions**: `y ~ x1 * x2`
 - **Smooth terms**: `y ~ s(z)`
 - **Random effects**: `y ~ x + (1|group)`
 - **Complex random effects**: `y ~ x + (1+x|group)`
-- **Non-linear models**: `y ~ a1 - a2^x, a1 ~ 1, a2 ~ x + (x|g), nl = TRUE`
 
 ### Supported Formulas (Coming Soon)
 
 - **Multivariate models**: `mvbind(y1, y2) ~ x + (1|g)`
+- **Non-linear models**: `y ~ a1 - a2^x, a1 ~ 1, a2 ~ x + (x|g), nl = TRUE`
 
-
-For the complete syntax reference, see the [fiasto documentation](https://github.com/alexhallam/fiasto).
+For the complete reference, see the [fiasto documentation](https://docs.rs/fiasto/latest/fiasto/).
 
 ## 📦 PyPI Package
 
@@ -97,47 +96,6 @@ pip install fiasto-py
 - **Source Code**: [github.com/alexhallam/fiasto-py](https://github.com/alexhallam/fiasto-py)
 - **Documentation**: This README and inline docstrings
 
-## 🛠️ Development
-
-### Prerequisites
-
-- Python 3.8+
-- Rust (latest stable)
-- maturin
-
-### Building
-
-```bash
-# Development build (with Python 3.13 compatibility)
-PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 maturin develop
-
-# Release build
-PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 maturin build --release
-
-# Run tests
-python example.py
-```
-
-### Publishing
-
-See [PYPI_GUIDE.md](PYPI_GUIDE.md) for detailed publishing instructions.
-
-### Project Structure
-
-```
-fiasto-py/
-├── src/
-│   └── lib.rs          # PyO3 module definition
-├── Cargo.toml          # Rust dependencies
-├── pyproject.toml      # Python package configuration
-├── LICENSE             # MIT license
-├── build.py            # Development build script
-├── publish.py          # PyPI publishing script
-├── example.py          # Usage examples
-├── PYPI_GUIDE.md       # Publishing guide
-├── .gitignore          # Git ignore rules
-└── README.md           # This file
-```
 
 ## 📚 API Reference
 
