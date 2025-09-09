@@ -26,6 +26,11 @@ Python bindings for [fiasto](https://github.com/alexhallam/fiasto) - A language-
 - **Tokenize Formulas**: Break down formulas into individual tokens with detailed information
 - **Python Dictionaries**: Returns native Python dictionaries for easy integration
 
+## 🎯 Simple API
+
+- `parse_formula()` - Takes a Wilkinson’s formula string and returns a Python dictionary
+- `lex_formula()` - Tokenizes a formula string and returns a Python dictionary
+
 ## 🚀 Quick Start
 
 ### Installation
@@ -37,6 +42,8 @@ pip install fiasto-py
 
 ### Usage
 
+#### Usage: Parse Formula
+
 ```python
 import fiasto_py
 from pprint import pprint
@@ -47,7 +54,51 @@ print("="*30)
 result = fiasto_py.parse_formula("y ~ x1 + x2 + (1|group)")
 pprint(result, compact = True)
 ```
-![Parse Formula](img/parse.png)
+
+**Output:**
+
+```bash
+==============================
+Parse Formula
+==============================
+{'all_generated_columns': ['y', 'x1', 'x2', 'group'],
+ 'columns': {'group': {'generated_columns': ['group'],
+                       'id': 4,
+                       'interactions': [],
+                       'random_effects': [{'correlated': True,
+                                           'grouping_variable': 'group',
+                                           'has_intercept': True,
+                                           'includes_interactions': [],
+                                           'kind': 'grouping',
+                                           'variables': []}],
+                       'roles': ['GroupingVariable'],
+                       'transformations': []},
+             'x1': {'generated_columns': ['x1'],
+                    'id': 2,
+                    'interactions': [],
+                    'random_effects': [],
+                    'roles': ['FixedEffect'],
+                    'transformations': []},
+             'x2': {'generated_columns': ['x2'],
+                    'id': 3,
+                    'interactions': [],
+                    'random_effects': [],
+                    'roles': ['FixedEffect'],
+                    'transformations': []},
+             'y': {'generated_columns': ['y'],
+                   'id': 1,
+                   'interactions': [],
+                   'random_effects': [],
+                   'roles': ['Response'],
+                   'transformations': []}},
+ 'formula': 'y ~ x1 + x2 + (1|group)',
+ 'metadata': {'family': None,
+              'has_intercept': True,
+              'has_uncorrelated_slopes_and_intercepts': False,
+              'is_random_effects_model': True}}
+```
+
+#### Usage: Lex Formula
 
 ```python
 import fiasto_py
@@ -58,9 +109,25 @@ print("="*30)
 tokens = fiasto_py.lex_formula("y ~ x1 + x2 + (1|group)")
 pprint(tokens, compact = True)
 ```
-![Lex Formula](img/lex.png)
 
+**Output:**
 
+```bash
+==============================
+Lex Formula
+==============================
+[{'lexeme': 'y', 'token': 'ColumnName'},
+ {'lexeme': '~', 'token': 'Tilde'},
+ {'lexeme': 'x1', 'token': 'ColumnName'},
+ {'lexeme': '+', 'token': 'Plus'},
+ {'lexeme': 'x2', 'token': 'ColumnName'},
+ {'lexeme': '+', 'token': 'Plus'},
+ {'lexeme': '(', 'token': 'FunctionStart'},
+ {'lexeme': '1', 'token': 'One'},
+ {'lexeme': '|', 'token': 'Pipe'},
+ {'lexeme': 'group', 'token': 'ColumnName'},
+ {'lexeme': ')', 'token': 'FunctionEnd'}]
+```
 
 ### Simple OLS Regression
 
