@@ -1,6 +1,6 @@
 # fiasto-py
 
-[![PyPI version](https://badge.fury.io/py/fiasto-py.svg)](https://badge.fury.io/py/fiasto-py)
+[![PyPI version](https://img.shields.io/pypi/v/fiasto-py.svg?cacheSeconds=3600)](https://pypi.org/project/fiasto-py/)
 [![Python versions](https://img.shields.io/pypi/pyversions/fiasto-py.svg)](https://pypi.org/project/fiasto-py/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
