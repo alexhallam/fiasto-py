@@ -1,6 +1,6 @@
 [project]
 name = "fiasto-py"
-version = "0.1.2"
+version = "0.1.3"
 description = "Python bindings for fiasto - A language-agnostic modern Wilkinson's formula parser and lexer"
 readme = "README.md"
 license = { text = "MIT" }
