@@ -41,7 +41,6 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ steps.set-target.outputs.target }}
-          args: --version
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -68,8 +67,6 @@ jobs:
 
       - name: Install maturin
         uses: PyO3/maturin-action@v1
-        with:
-          args: --version
 
       - name: Build sdist
         uses: PyO3/maturin-action@v1
