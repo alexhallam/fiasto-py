@@ -25,22 +25,16 @@ jobs:
         with:
           targets: ${{ steps.set-target.outputs.target }}
 
-      - name: Set target for Windows
+      - name: Set target
         id: set-target
-        if: matrix.os == 'windows-latest'
-        run: echo "target=x86_64-pc-windows-msvc" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Set target for macOS
-        id: set-target
-        if: matrix.os == 'macos-latest'
-        run: echo "target=x86_64-apple-darwin" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Set target for Linux
-        id: set-target
-        if: matrix.os == 'ubuntu-latest'
-        run: echo "target=x86_64-unknown-linux-gnu" >> $GITHUB_OUTPUT
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            echo "target=x86_64-pc-windows-msvc" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+            echo "target=x86_64-apple-darwin" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            echo "target=x86_64-unknown-linux-gnu" >> $GITHUB_OUTPUT
+          fi
         shell: bash
 
       - name: Install maturin
