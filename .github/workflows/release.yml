@@ -1,0 +1,121 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
+
+jobs:
+  build:
+    name: Build wheels
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ steps.set-target.outputs.target }}
+
+      - name: Set target for Windows
+        id: set-target
+        if: matrix.os == 'windows-latest'
+        run: echo "target=x86_64-pc-windows-msvc" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Set target for macOS
+        id: set-target
+        if: matrix.os == 'macos-latest'
+        run: echo "target=x86_64-apple-darwin" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Set target for Linux
+        id: set-target
+        if: matrix.os == 'ubuntu-latest'
+        run: echo "target=x86_64-unknown-linux-gnu" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Install maturin
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ steps.set-target.outputs.target }}
+          args: --version
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ steps.set-target.outputs.target }}
+          args: --release --out dist
+        env:
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: dist/
+
+  build-sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install maturin
+        uses: PyO3/maturin-action@v1
+        with:
+          args: --version
+
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          args: sdist --out dist
+
+      - name: Upload sdist
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [build, build-sdist]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Move artifacts to dist
+        run: |
+          mkdir -p dist
+          find . -name "*.whl" -exec mv {} dist/ \;
+          find . -name "*.tar.gz" -exec mv {} dist/ \;
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to PyPI
+        uses: PyO3/maturin-action@v1
+        with:
+          args: upload --skip-existing
+        env:
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
+          MATURIN_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
