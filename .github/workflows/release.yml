@@ -10,51 +10,71 @@ permissions:
   contents: write
 
 env:
-  # Single abi3 wheel per platform for CPython >= 3.8
+  # Produce one abi3 wheel per platform for CPython >= 3.8
   PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
 
 jobs:
   build-linux:
-    name: Build Linux (manylinux2014 x86_64)
+    name: Build Linux (manylinux_2_17 x86_64)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # maturin-action installs Rust + Python toolchains as needed
+      # Build manylinux PEP600 wheels; no --compatibility flag (avoids double-tag error)
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          manylinux: "2014"
+          manylinux: "2_17"
           args: >-
             --release
-            --compatibility manylinux2014
             --find-interpreter
-          # default target is x86_64-unknown-linux-gnu inside manylinux
-
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-linux
           path: target/wheels/*
 
-  build-macos:
-    name: Build macOS (universal2)
-    runs-on: macos-latest
+  build-macos-arm64:
+    name: Build macOS (arm64)
+    runs-on: macos-15-arm64
     steps:
       - uses: actions/checkout@v4
-      - name: Build wheels
+      - name: Build wheels (arm64)
         uses: PyO3/maturin-action@v1
         with:
           command: build
           args: >-
             --release
-            --universal2
             --find-interpreter
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos
+          name: wheels-macos-arm64
+          path: target/wheels/*
+
+  build-macos-x86_64:
+    name: Build macOS (x86_64 via cross-compile)
+    runs-on: macos-15-arm64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add Rust target x86_64-apple-darwin
+        run: rustup target add x86_64-apple-darwin
+      - name: Build wheels (x86_64)
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          target: x86_64-apple-darwin
+          args: >-
+            --release
+            --find-interpreter
+        env:
+          # Help ensure broad macOS compatibility for x86_64
+          MACOSX_DEPLOYMENT_TARGET: 11.0
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-macos-x86_64
           path: target/wheels/*
 
   build-windows:
@@ -93,7 +113,12 @@ jobs:
   release:
     name: Create GitHub Release & Publish to PyPI
     runs-on: ubuntu-latest
-    needs: [build-linux, build-macos, build-windows, build-sdist]
+    needs:
+      - build-linux
+      - build-macos-arm64
+      - build-macos-x86_64
+      - build-windows
+      - build-sdist
     steps:
       - uses: actions/checkout@v4
 
@@ -123,8 +148,6 @@ jobs:
           command: upload
           args: --skip-existing dist/*
         env:
-          # maturin uses __token__ by default if MATURIN_USERNAME is unset,
-          # but we set it explicitly for clarity.
           MATURIN_USERNAME: __token__
           MATURIN_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
