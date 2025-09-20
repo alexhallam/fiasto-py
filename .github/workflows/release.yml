@@ -10,25 +10,31 @@ permissions:
   contents: write
 
 env:
-  # Produce one abi3 wheel per platform for CPython >= 3.8
+  # Keep for future abi3 usage (if you enable abi3 in Cargo.toml).
   PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
 
 jobs:
   build-linux:
-    name: Build Linux (manylinux_2_17 x86_64)
+    name: Build Linux (manylinux_2_17 x86_64; CPython only)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # Build manylinux PEP600 wheels; no --compatibility flag (avoids double-tag error)
+      # Build only against CPython interpreters in the manylinux image.
+      # This avoids PyPy 3.11 which pyo3 0.21.x doesn't support.
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          manylinux: "2_17"
+          manylinux: "2_17"  # PEP 600 tag (single platform tag)
           args: >-
             --release
-            --find-interpreter
+            -i /opt/python/cp38-cp38/bin/python
+            -i /opt/python/cp39-cp39/bin/python
+            -i /opt/python/cp310-cp310/bin/python
+            -i /opt/python/cp311-cp311/bin/python
+            -i /opt/python/cp312-cp312/bin/python
+            -i /opt/python/cp313-cp313/bin/python
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -69,7 +75,7 @@ jobs:
             --release
             --find-interpreter
         env:
-          # Help ensure broad macOS compatibility for x86_64
+          # Reasonable baseline; tweak if you need older macOS support.
           MACOSX_DEPLOYMENT_TARGET: 11.0
       - name: Upload wheels
         uses: actions/upload-artifact@v4
