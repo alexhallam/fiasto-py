@@ -1,16 +1,14 @@
-# Changelog
+## [0.1.5] - 2025-09-20
 
-All notable changes to this project will be documented in this file.
+### Changed
+- Trying to get autorelease for more operating systems
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [0.1.2] - 2024-12-09
+## [0.1.2] - 2025-09-05
 
 ### Changed
 - Bumped version to 0.1.2 for PyPI publishing
 
-## [0.1.1] - 2024-12-09
+## [0.1.1] - 2025-09-02
 
 ### Changed
 - Updated fiasto dependency from 0.2.4 to 0.2.5
@@ -22,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tidy DataFrame output format for regression coefficients
 - Comprehensive usage examples with expected outputs
 
-## [0.1.0] - 2024-12-09
+## [0.1.0] - 2025-09-01
 
 ### Added
 - Initial release of fiasto-py
