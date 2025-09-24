@@ -21,11 +21,49 @@ permissions:
   contents: read
 
 jobs:
-  linux:
+  # Start with just Linux x86_64 to debug issues
+  linux-x86_64:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Debug - List project files
+        run: |
+          echo "=== Project structure ==="
+          find . -name "*.toml" -o -name "*.py" -o -name "*.rs" | head -20
+          echo "=== pyproject.toml ==="
+          cat pyproject.toml || echo "No pyproject.toml found"
+          echo "=== Cargo.toml ==="
+          cat Cargo.toml || echo "No Cargo.toml found"
+        
+      - name: Build wheel (with verbose output)
+        uses: PyO3/maturin-action@v1
+        with:
+          target: x86_64
+          args: --release --out dist --verbose
+          sccache: 'true'
+          manylinux: auto
+          
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-x86_64
+          path: dist
+
+  # Only run other platforms if Linux x86_64 succeeds
+  linux-other:
+    runs-on: ubuntu-latest
+    needs: [linux-x86_64]
     strategy:
       matrix:
-        target: [x86_64, x86, aarch64, armv7]
+        target: [x86, aarch64, armv7]
     steps:
       - uses: actions/checkout@v4
       
@@ -52,7 +90,9 @@ jobs:
 
   windows:
     runs-on: windows-latest
+    needs: [linux-x86_64]
     strategy:
+      fail-fast: false
       matrix:
         target: [x64, x86]
     steps:
@@ -83,7 +123,9 @@ jobs:
 
   macos:
     runs-on: ${{ matrix.runner }}
+    needs: [linux-x86_64]
     strategy:
+      fail-fast: false
       matrix:
         include:
           - runner: macos-12
@@ -143,12 +185,11 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     if: "startsWith(github.ref, 'refs/tags/') || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')"
-    needs: [linux, windows, macos, sdist]
+    needs: [linux-x86_64, linux-other, windows, macos, sdist]
     environment:
       name: pypi
       url: https://pypi.org/p/fiasto-py
     permissions:
-      # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
       contents: write
     steps:
@@ -194,14 +235,14 @@ jobs:
   test:
     name: Test Build
     runs-on: ubuntu-latest
-    needs: [linux, windows, macos, sdist]
+    needs: [linux-x86_64, sdist]
     if: "!startsWith(github.ref, 'refs/tags/') && github.event_name != 'release' && github.event.inputs.publish != 'true'"
     steps:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
           
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: wheels-*
@@ -216,9 +257,14 @@ jobs:
           python -m pip install --upgrade pip
           # Test installing a Linux wheel if available
           if ls dist/*linux_x86_64*.whl 1> /dev/null 2>&1; then
+            echo "Installing Linux x86_64 wheel..."
             pip install dist/*linux_x86_64*.whl
             python -c "import fiasto_py; print('Package installed successfully')"
             python -c "import fiasto_py; print('Testing parse_formula...'); result = fiasto_py.parse_formula('y ~ x'); print('Success!')"
           else
-            echo "No compatible wheel found for testing"
+            echo "No x86_64 wheel found, trying sdist..."
+            if ls dist/*.tar.gz 1> /dev/null 2>&1; then
+              # This will likely fail without Rust, but let's try
+              pip install dist/*.tar.gz || echo "Sdist installation failed (expected without Rust)"
+            fi
           fi
